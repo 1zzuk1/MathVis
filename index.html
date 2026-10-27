@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Theorem Sketchpad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <section class="pane left" aria-label="Source">
+    <header class="brand">
+      <span class="mark" aria-hidden="true">∀∃</span>
+      <h1>Theorem Sketchpad</h1>
+      <button type="button" class="help-btn" id="helpBtn" title="What is this? How to start" aria-label="Help">?</button>
+      <nav class="tabs" role="tablist" aria-label="Panels">
+        <button class="tab" role="tab" data-tab="notebook" aria-selected="true">Notebook</button>
+        <button class="tab" role="tab" data-tab="libraries" aria-selected="false" tabindex="-1">Libraries</button>
+        <button class="tab" role="tab" data-tab="syntax" aria-selected="false" tabindex="-1">Language</button>
+      </nav>
+    </header>
+
+    <div class="tabpanel notebook" id="tab-notebook" role="tabpanel">
+      <div class="toolbar">
+        <label class="ex-label" for="examples">Notebook</label>
+        <select id="examples"></select>
+        <button type="button" id="nbSaveAs" class="btn small">Save as…</button>
+        <button type="button" id="nbDelete" class="btn small danger" hidden>Delete</button>
+        <div class="share">
+          <button type="button" id="nbShare" class="btn small" aria-haspopup="true" aria-expanded="false">Share ▾</button>
+          <div class="menu" id="shareMenu" role="menu" hidden>
+            <button type="button" role="menuitem" id="shareLink">Copy a link to this notebook</button>
+            <button type="button" role="menuitem" id="shareFile">Download the notebook</button>
+            <button type="button" role="menuitem" id="shareReport">Download a report of the results</button>
+            <label class="menu-file" role="menuitem">Open a notebook file…<input type="file" id="openFile" accept=".mv,.txt,text/plain"></label>
+          </div>
+        </div>
+        <button type="button" id="wordsBtn" class="btn small" aria-expanded="false" title="Write a statement in plain English and get the notation">Words…</button>
+        <div class="symbols" role="group" aria-label="Insert symbol">
+          <button type="button" data-ins="∀ " title="for all">∀</button>
+          <button type="button" data-ins="∃ " title="there exists">∃</button>
+          <button type="button" data-ins=" ∈ " title="in">∈</button>
+          <button type="button" data-ins=" ⊆ " title="subset">⊆</button>
+          <button type="button" data-ins=" ≤ " title="at most">≤</button>
+          <button type="button" data-ins=" ⇒ " title="implies">⇒</button>
+          <button type="button" data-ins="ε" title="epsilon">ε</button>
+          <button type="button" data-ins="δ" title="delta">δ</button>
+          <button type="button" data-ins="ℝ²" title="the plane">ℝ²</button>
+        </div>
+        <label class="auto" title="Run again a moment after you stop typing"><input type="checkbox" id="autorun"> Auto-run</label>
+        <label class="auto" title="Lay out formulas as mathematics: fractions, roots, sums with limits"><input type="checkbox" id="typeset"> Typeset</label>
+        <button type="button" id="run" class="run" title="Run (Ctrl+Enter)"><span class="label">Run</span><kbd>Ctrl ↵</kbd></button>
+      </div>
+      <form id="saveForm" class="save-form" hidden>
+        <label for="nbName">Save this notebook as</label>
+        <input id="nbName" type="text" autocomplete="off">
+        <button type="submit" class="btn small primary">Save</button>
+        <button type="button" id="nbCancel" class="btn small">Cancel</button>
+      </form>
+      <section id="wordsPanel" class="words-panel" hidden aria-label="Write in words">
+        <div class="words-top">
+          <label for="wordsInput">Write a statement in words; one per line.</label>
+          <button type="button" id="wordsClose" class="welcome-close" aria-label="Close">×</button>
+        </div>
+        <textarea id="wordsInput" rows="2" spellcheck="true" placeholder="For every real number x, x squared is at least 0."></textarea>
+        <div id="wordsOut" class="words-out" aria-live="polite"></div>
+        <div class="welcome-actions">
+          <button type="button" id="wordsRun" class="btn small primary" disabled title="Ctrl+Enter">Insert and run</button>
+          <button type="button" id="wordsInsert" class="btn small" disabled>Insert</button>
+        </div>
+        <div class="words-examples" id="wordsExamples"><span class="note">Try:</span></div>
+      </section>
+      <div class="editor main-editor" id="notebookEditor">
+        <div class="gutter" aria-hidden="true"><pre class="gut"></pre></div>
+        <div class="code">
+          <pre class="hl" aria-hidden="true"></pre>
+          <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="Notebook source"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabpanel libraries" id="tab-libraries" role="tabpanel" hidden>
+      <div id="libListWrap">
+        <p class="lead">A library adds functions, constants, spaces, value types and views. Write definitions in notebook notation, or use JavaScript for anything the notation can't express. Libraries you add here are saved in this browser.</p>
+        <div class="lib-toolbar">
+          <button type="button" id="newNotation" class="btn">New notation library</button>
+          <button type="button" id="newJs" class="btn">New JavaScript library</button>
+          <label class="btn file-btn">Load from file<input type="file" id="libFile" accept=".js,.mvl,.txt"></label>
+        </div>
+        <input type="search" id="libSearch" class="lib-search" placeholder="Search every library: curvature, compact, eigenvalue, Lagrange…" aria-label="Search the libraries" autocomplete="off">
+        <ul class="lib-list" id="libList"></ul>
+      </div>
+      <div class="lib-detail" id="libDetail" hidden>
+        <button type="button" id="libBack" class="back">← All libraries</button>
+        <div class="lib-head"><h2 id="libTitle"></h2><span id="libBadges" class="badges"></span></div>
+        <p id="libDesc" class="lib-desc-full"></p>
+        <p id="libUse" class="lib-use"></p>
+        <div id="libExports" class="exports"></div>
+        <div class="src-head">
+          <span class="src-label">Source</span>
+          <button type="button" id="libCopySource" class="link-btn">Copy source</button>
+        </div>
+        <div class="editor lib-editor" id="libEditor">
+          <div class="gutter" aria-hidden="true"><pre class="gut"></pre></div>
+          <div class="code">
+            <pre class="hl" aria-hidden="true"></pre>
+            <textarea id="libSrc" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="Library source"></textarea>
+          </div>
+        </div>
+        <div class="lib-actions">
+          <button type="button" id="libSave" class="btn primary">Save</button>
+          <button type="button" id="libTry" class="btn">Try it in the notebook</button>
+          <button type="button" id="libCopy" class="btn">Copy as a new library</button>
+          <button type="button" id="libDelete" class="btn danger">Delete</button>
+          <p id="libMsg" class="lib-msg" role="status"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabpanel syntax" id="tab-syntax" role="tabpanel" hidden>
+      <p class="lead">A notebook is a list of statements. Definitions build up an environment; claims are checked by sampling and drawn. <code>LANGUAGE.md</code> has the full grammar.</p>
+      <h3>Statements</h3>
+      <dl class="ref">
+        <dt><code>import topology, sequences</code></dt><dd>Load libraries.</dd>
+        <dt><code>let M = [[2, 1], [1, 3]]</code></dt><dd>Name a value.</dd>
+        <dt><code>def f(x) := x^2 - 1</code></dt><dd>Define a function. Bodies may use quantifiers, sets and other definitions, including later ones and themselves.</dd>
+        <dt><code>def g(x: R^2, s: Seq(R)) := …</code></dt><dd>Typed parameters: each argument is checked against its space when the function is called.</dd>
+        <dt><code>def D := {p in R^2 | |p| &lt; 1}</code></dt><dd>Define a set.</dd>
+        <dt><code>theorem name: …</code></dt><dd>Check a claim. <code>lemma</code>, <code>claim</code>, <code>conjecture</code> and unnamed <code>check</code> work the same way.</dd>
+        <dt><code>plot f(x) for x in [-5, 5]</code></dt><dd>Plot numbers against a variable, or points of the plane or of space as a path. With two variables, <code>plot f(x, y) for x in …, y in …</code> draws a surface; an expression giving points <code>(x, y, z)</code> draws a parametric surface.</dd>
+        <dt><code>show region(D)</code></dt><dd>Open a view that a library provides.</dd>
+        <dt><code>explain open</code></dt><dd>Show a definition, lemma, function or set: its statement, a plain-English reading, what it uses, and a gallery of examples that do and don’t satisfy it. <code>explain f for x in …</code> picks the examples.</dd>
+        <dt><code>check union_of_open</code></dt><dd>Check a named lemma or theorem, from a library or from earlier in the notebook.</dd>
+        <dt><code>vary continuous_at</code></dt><dd>Change one part of a definition (or claim) at a time and show what changes.</dd>
+        <dt><code>structure Group(G: Set, op: Fun, e) extends Monoid where inverses: …</code></dt><dd>A structure defined by axioms. <code>Group(…)</code> builds one; <code>check g in Group</code> checks each axiom; <code>explain Group</code> tries the examples.</dd>
+        <dt><code>concept prime(n: Z) where two_divisors: … wilson: …</code></dt><dd>One notion with several equivalent definitions (one per line). Each is a definition of its own (<code>prime_wilson</code>); the card compares them on the examples, disagreements first.</dd>
+        <dt><code>interpret x</code></dt><dd>Every way of looking at a value: a submanifold as a chart, local equations, a local graph and a straightening; a matrix as a map, by eigenvectors, as a quadratic form; a number as primes or a continued fraction… For <code>interpret prime(7)</code>, every form of the concept at 7.</dd>
+        <dt><code>{G = Zmod(5), op = add_mod(5)}</code>, <code>g.op</code></dt><dd>Records and fields. <code>import topology as top</code> then <code>top.open</code>.</dd>
+        <dt><code>proof of name:</code> + indented steps</dt><dd><code>let x</code>, <code>assume P</code>, <code>choose δ = …</code>, <code>choose N in D such that P</code>, <code>have P</code>, <code>so P</code>: each step is checked in its context and the goal is tracked. Blocks on indented lines: <code>case x >= 0:</code> … <code>otherwise:</code> …, <code>induction on n</code> with <code>base:</code> and <code>step:</code>, and <code>contradiction</code> (then <code>so false</code>). <code>have P by lemma</code> checks the lemma's hypothesis.</dd>
+        <dt><code>diagram name:</code> + indented lines</dt><dd>Arrows <code>f: A -> B</code> between finite sets or groups, then <code>g ∘ f = h</code> (f first), <code>exact at B</code> or <code>commutes</code>. Checked at every element and drawn; arrows between groups are tested for being homomorphisms.</dd>
+        <dt><code>lim n -> inf: s(n)</code></dt><dd>Any other line is evaluated and printed.</dd>
+        <dt><strong>Words…</strong> (toolbar)</dt><dd>Write in English: "for every real number x, x squared is at least 0", "every convergent sequence is bounded", "the sum of k for k from 1 to n equals n(n + 1)/2 for every natural number n". The notation appears, typeset, ready to insert; a sentence only partly understood is marked <strong>?</strong>.</dd>
+      </dl>
+      <p>Indent a line, or end the previous one with an operator, to continue a statement. <code>#</code> starts a comment; comments right above a <code>def</code> document it.</p>
+
+      <h3>Spaces</h3>
+      <dl class="ref">
+        <dt><code>R</code> ℝ, <code>Z</code> ℤ, <code>N</code> ℕ</dt><dd>Numbers. Membership is unbounded; sampling uses [−10, 10], −50..50 and 0..100.</dd>
+        <dt><code>[a, b]</code>, <code>(a, b]</code>, <code>Ioo(a, b)</code>, <code>a..b</code></dt><dd>Intervals (also <code>Icc</code>, <code>Ico</code>, <code>Ioc</code>) and whole-number ranges.</dd>
+        <dt><code>R^2</code> ℝ², <code>[0, 1]^3</code>, <code>A * B</code></dt><dd>Products. Their elements are points such as <code>(1, 2)</code>.</dd>
+        <dt><code>{p in R^2 | P}</code>, <code>{(x, y) in R^2 | P}</code></dt><dd>Sets. Also <code>A ∪ B</code>, <code>A ∩ B</code>, <code>A \ B</code>, <code>complement(A)</code>, <code>A ⊆ B</code>.</dd>
+        <dt><code>Ball(c, r)</code>, <code>ClosedBall(c, r)</code></dt><dd>Balls in ℝ or ℝⁿ.</dd>
+        <dt><code>Seq(X)</code></dt><dd>Sequences in X. <code>Seq(Seq(R))</code> is sequences of sequences.</dd>
+        <dt><code>Set</code>, <code>Fun</code></dt><dd>For typed parameters: any set, any function.</dd>
+        <dt><code>Disk</code>, <code>Rect</code>, <code>Triangle</code>, <code>Polygon</code>, <code>HalfPlane</code>, <code>Annulus</code>, <code>Ellipse</code></dt><dd>Shapes of the plane, as sets; also <code>area</code>, <code>centroid</code>, <code>diameter</code>.</dd>
+        <dt><code>Subsets(R^2)</code>, <code>Functions(R)</code>, <code>Sequences(R)</code></dt><dd>Named example objects to quantify over: <code>forall A, B in Subsets(R^2): …</code></dd>
+      </dl>
+
+      <h3>Logic and expressions</h3>
+      <dl class="ref">
+        <dt><code>forall</code> ∀, <code>exists</code> ∃</dt><dd><code>forall x in S, ε &gt; 0, (a, b) in R^2: …</code></dd>
+        <dt><code>and or not -&gt; &lt;-&gt;</code></dt><dd>Also ∧ ∨ ¬ ⇒ ⇔ and <code>implies</code>, <code>iff</code>.</dd>
+        <dt><code>= != &lt; &lt;= &gt; &gt;=</code></dt><dd>Chainable. Within 10⁻⁹ (relative) counts as equal: <code>&lt;=</code> includes numbers just over, <code>&lt;</code> excludes numbers just under.</dd>
+        <dt><code>sum k in 1..n: k^2</code></dt><dd>Also <code>prod</code>, <code>max</code>, <code>min</code>, <code>sup</code>, <code>inf</code>. <code>sup</code> and <code>inf</code> over infinite sets are sampled.</dd>
+        <dt><code>lim n -&gt; inf: s(n)</code></dt><dd>Limits of sequences; <code>lim x -&gt; a: f(x)</code> for functions. Also <code>lim(s)</code>, <code>convergent(s)</code>.</dd>
+        <dt><code>a + b where a = …, b = …</code></dt><dd>Local definitions.</dd>
+        <dt><code>|x|  x[1]  x =&gt; x^2  if c then a else b</code></dt><dd>Length of a number or point, coordinates from 1, functions, conditionals. Points and sequences add and scale coordinatewise.</dd>
+      </dl>
+
+      <h3>Finding counterexamples</h3>
+      <ul class="ref-list">
+        <li>Numbers know whether they are rational: <code>sqrt(1/2)</code> is <code>√2/2</code>. Claims about <code>Q</code>, <code>Irrationals</code>, <code>is_rational</code> or the Dirichlet and Thomae functions are sampled with exact fractions and irrationals.</li>
+        <li><code>import asymptotics</code>: limits, series and continuity of formulas decided exactly (<code>series_test(n =&gt; (-1)^n/sqrt(n) + 1/n)</code>), and thresholds of families: <code>show family(p =&gt; summable(n =&gt; 1/n^p), 0, 3)</code>.</li>
+        <li><code>import models</code>: every small model (groups of order ≤ 8, topologies and posets on ≤ 4 points, relations on ≤ 3 points, operations on ≤ 3 elements), so the first counterexample is a smallest one. <code>import topspaces</code>: infinite spaces by their known properties.</li>
+        <li><code>import zoo</code>: famous functions and sets (Dirichlet, Thomae, Weierstrass, Cantor, the fat Cantor set, …) that know exact facts about themselves; <code>explain Famous</code>, <code>facts_of(thomae)</code>.</li>
+        <li>A failing claim shows its <strong>simplest counterexample</strong> (simple fractions, earlier catalog objects); a holding comparison gets a <strong>targeted search</strong> toward failure.</li>
+        <li><strong>Try wilder examples</strong> adds pathological functions, sets, sequences, series and matrices to the catalogs.</li>
+        <li><strong>Is every condition needed?</strong> drops hypotheses, swaps &lt; and ≤, reorders quantifiers and changes ranges, checking each version, and finds sharp constants.</li>
+        <li><strong>Proved</strong> means every case was checked exactly; interval arithmetic proves inequalities on boxes, with a proof map.</li>
+      </ul>
+
+      <h3>Working with pictures</h3>
+      <ul class="ref-list">
+        <li>Drag to pan, scroll after clicking (or Ctrl+scroll) or pinch to zoom, double-click to reset. Curves and shaded regions are recomputed for the new view.</li>
+        <li><strong>Sample this view</strong> checks a claim again using only the zoomed range; <strong>More samples</strong> checks it with four times as many.</li>
+        <li>Click a counterexample, a gallery tile or a table cell to see <strong>why</strong>: the claim evaluated step by step, with the failing case or witness of each quantifier and each definition unfolded.</li>
+      </ul>
+
+      <h3>How claims are drawn</h3>
+      <table class="ref-table">
+        <thead><tr><th>Variables after ∀</th><th>Picture</th></tr></thead>
+        <tbody>
+          <tr><td>none</td><td>A verdict, with both sides of a comparison.</td></tr>
+          <tr><td>one number</td><td>Both sides against the variable, failing stretches shaded.</td></tr>
+          <tr><td>two numbers, or a point of a box</td><td>A grid colored by result. Darker green means more slack.</td></tr>
+          <tr><td>a point of a set</td><td>The set, the sampled points colored by result, and witness balls for “∃ε”.</td></tr>
+          <tr><td>a sequence</td><td>A gallery of sampled sequences (paths, in the plane), with their limits.</td></tr>
+          <tr><td>named objects (a catalog)</td><td>A tile per object, or a table for two variables, colored by result.</td></tr>
+          <tr><td>a point of space (three numbers)</td><td>A cloud in 3D colored by result; drag to turn it.</td></tr>
+          <tr><td>more numbers</td><td>Random samples, left side against right side.</td></tr>
+        </tbody>
+      </table>
+      <ul class="ref-list">
+        <li>Sets are sampled inside, near their boundary, and on it: the boundary is found by bisection, which is how open and closed sets are told apart.</li>
+        <li><code>Seq(X)</code> tries sequences that run into X’s boundary, converge inside X, stay constant, alternate or diverge. They know their own limits.</li>
+        <li>In <code>P -&gt; Q</code>, samples where <code>P</code> is false hold vacuously and are drawn gray.</li>
+        <li>Checking a call to a definition unfolds it, and so are definitions used in its conclusion.</li>
+        <li>Results are evidence, not proof: nested quantifiers use 64, 40 and then 20 samples.</li>
+      </ul>
+
+      <h3>Writing libraries</h3>
+      <p>The quickest library is a notation library: <code>library name</code> followed by <code>def</code>s, each documented by the comment above it. A JavaScript library calls <code>MathViz.define</code>:</p>
+<pre class="api"><code>MathViz.define({
+  name: 'mylib',
+  description: 'One sentence.',
+  requires: ['linalg'],
+  constants: { golden: 1.618 },
+  functions: { sq: { doc: 'sq(x) = x²', fn: x =&gt; x * x } },
+  spaces: { Annulus: (r, R) =&gt; MathViz.space({
+              window: [[-R, R], [-R, R]], contains: p =&gt; … }) },
+  types: [{ name, test, ops: { '+', '*', neg, abs, '=', '&lt;', format } }],
+  views: { myview: { doc: '…', render(ctx, ...args) { … } } },
+});</code></pre>
+      <p>A space only needs <code>contains</code> plus a sampling <code>window</code> (or a <code>random()</code> function); sampling, boundary search and <code>Seq(…)</code> then work automatically. Views draw with <code>ctx.figure({ x, y, square })</code> and <code>fig.curve</code>, <code>points</code>, <code>circle</code>, <code>region</code>, <code>raster</code>, add sliders with <code>ctx.param</code>, and report with <code>ctx.legend</code>, <code>ctx.note</code>, <code>ctx.table</code>. <code>README.md</code> lists every helper.</p>
+    </div>
+  </section>
+
+  <section class="pane right" aria-label="Results">
+    <div class="results-head">
+      <div id="summary" class="summary" role="status"></div>
+    </div>
+    <aside id="welcome" class="welcome" hidden aria-labelledby="welcomeTitle">
+      <button type="button" class="welcome-close" id="welcomeClose" aria-label="Close the welcome">×</button>
+      <h2 id="welcomeTitle">Write mathematics, see whether it's true</h2>
+      <p>Write definitions and claims in a notation close to the blackboard. Each claim is checked:
+        <strong>proved</strong> when algebra or an exhaustive check settles it, otherwise tested on many examples, and when it's
+        false you get the <strong>simplest counterexample</strong>, drawn. Proofs are checked step by step.</p>
+      <ul class="welcome-steps">
+        <li>The first example, <strong>Analysis II · 1–3</strong>, is open in the editor: press <kbd>Run</kbd> (or <kbd>Ctrl</kbd>+<kbd>Enter</kbd>), drag the sliders, then change something.</li>
+        <li>The <strong>Notebook</strong> menu has the rest of the course, chapter by chapter, through integrals in ℝⁿ and vector analysis.</li>
+        <li>The <strong>Libraries</strong> tab has ready-made definitions and theorems; the <strong>Language</strong> tab is the reference.</li>
+      </ul>
+      <div class="welcome-actions">
+        <button type="button" class="btn primary" id="welcomeRun">Run this notebook</button>
+        <button type="button" class="btn" id="welcomeCourses">Browse the examples</button>
+        <button type="button" class="btn" id="welcomeLang">Language reference</button>
+      </div>
+    </aside>
+    <div id="preview" class="cards preview"></div>
+    <div id="cards" class="cards"></div>
+  </section>
+</div>
+
+<script src="src/syntax.js"></script>
+<script src="src/mathml.js"></script>
+<script src="src/symbolic.js"></script>
+<script src="src/words.js"></script>
+<script src="src/inequal.js"></script>
+<script src="src/exact.js"></script>
+<script src="src/spaces.js"></script>
+<script src="src/runtime.js"></script>
+<script src="src/cautions.js"></script>
+<script src="src/topics.js"></script>
+<script src="src/interpret.js"></script>
+<script src="src/asym.js"></script>
+<script src="src/variations.js"></script>
+<script src="src/diagrams.js"></script>
+<script src="src/proofs.js"></script>
+<script src="src/intervals.js"></script>
+<script src="src/figure.js"></script>
+<script src="src/figure3d.js"></script>
+<script src="src/figure-diagram.js"></script>
+<!-- Libraries. Add your own library files here, after src/ and before app.js. -->
+<script src="libs/core.js"></script>
+<script src="libs/catalog.js"></script>
+<script src="libs/geometry.js"></script>
+<script src="libs/topology.js"></script>
+<script src="libs/sequences.js"></script>
+<script src="libs/analysis.js"></script>
+<script src="libs/complex.js"></script>
+<script src="libs/linalg.js"></script>
+<script src="libs/numtheory.js"></script>
+<script src="libs/means.js"></script>
+<script src="libs/functions.js"></script>
+<script src="libs/metric.js"></script>
+<script src="libs/algebra.js"></script>
+<script src="libs/series.js"></script>
+<script src="libs/zoo.js"></script>
+<script src="libs/integration.js"></script>
+<script src="libs/multivar.js"></script>
+<script src="libs/compactness.js"></script>
+<script src="libs/multint.js"></script>
+<script src="libs/manifolds.js"></script>
+<script src="libs/asymptotics.js"></script>
+<script src="libs/models.js"></script>
+<script src="libs/topspaces.js"></script>
+<script src="libs/groups.js"></script>
+<script src="libs/dynamics.js"></script>
+<script src="libs/curves.js"></script>
+<script src="libs/probability.js"></script>
+<script src="libs/graphs.js"></script>
+<script src="libs/logic.js"></script>
+<script src="libs/fourier.js"></script>
+<script src="libs/numerics.js"></script>
+<!-- The app itself. -->
+<script src="app/editor.js"></script>
+<script src="app/typeset.js"></script>
+<script src="app/workers.js"></script>
+<script src="app/cards.js"></script>
+<script src="app/claims.js"></script>
+<script src="app/interpret.js"></script>
+<script src="app/proofs.js"></script>
+<script src="app/diagrams.js"></script>
+<script src="app/library.js"></script>
+<script src="app/courses.js"></script>
+<script src="app/main.js"></script>
+<script src="app/share.js"></script>
+<script src="app/words.js"></script>
+</body>
+</html>

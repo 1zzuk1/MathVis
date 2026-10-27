@@ -1,0 +1,12 @@
+{
+  "name": "theorem-sketchpad",
+  "private": true,
+  "description": "Write mathematics the way it looks on the blackboard and see whether it is true: definitions and theorems checked, proved where algebra settles them, drawn, with the simplest counterexample when they fail.",
+  "scripts": {
+    "test": "node tests/run.js",
+    "test:quick": "node tests/run.js --quick",
+    "build": "node build.js",
+    "release": "node build.js --release",
+    "serve": "node serve.js"
+  }
+}
