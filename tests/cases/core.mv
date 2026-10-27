@@ -1,0 +1,80 @@
+# Core language: values, formatting, claims, simplest counterexamples and the tie rule.
+
+#! value 5/12
+1/3 + 1/12
+#! value 0.3
+0.1 + 0.2
+#! value 1e-20
+1e-20
+#! value −5/6
+-5/6
+#! value √2
+sqrt(2)
+#! value {1, 2, 3}
+{1, 2} ∪ {2, 3}
+#! value true
+{1, 2} = {2, 1}
+#! value true
+{1, 2, 3} ∩ {2, 3, 4} = {2, 3}
+#! value 3
+|{4, 5, 6}|
+#! value ∅
+{x in {1, 2, 3} | x > 5}
+
+#! holds
+check forall x in [0, 1]: x^2 <= x
+#! fails simplest 0.5
+check forall x in [0, 2]: x^2 >= x
+#! fails simplest 0
+check forall x in [0, 1]: x^2 < x
+
+# A strict inequality is not refuted by rounding ties at an open end.
+#! holds
+check forall x in (0, 1): x^2 < x
+#! holds
+check forall ε > 0: min(1, ε / 3) > 0
+# … but a tie that simplifies to a real counterexample is one.
+#! fails simplest 0
+check forall x in R: x^2 > 0
+#! fails
+check forall x in R: x^2 != 2
+
+#! holds
+check forall x, y in [0, 5]: sqrt(x*y) <= (x + y)/2
+#! never-tested
+check forall x in [0, 1]: x > 2 -> x < 0
+
+# Finite ranges are checked exhaustively, and then called proved.
+#! holds proved
+check forall n in 1..50: sum k in 1..n: k = n*(n + 1)/2
+
+#! error
+check forall x in [0, 1]: undefined_name(x) > 0
+
+# Existentials over the reals find simple values and solve equations, instead of hoping a sample
+# lands on the root.
+#! holds
+check forall x in [0, 1]: exists y in R: y^3 = x
+#! holds
+check exists y in R: y^2 = 2 and y > 0
+#! holds
+check forall a in [1, 5]: exists t in [0, 10]: t^2 - a*t + 0 = 0 and t > 0
+#! fails
+check exists y in R: y^2 = -1
+#! fails
+check exists y in R: 1/y = 0
+#! fails
+check exists y in R: floor(y) = 0.5
+#! fails
+check forall x in [0, 1]: exists y in [0, 0.5]: y^2 = x
+#! holds
+check exists y in R: (y - 1.5)^2 = 0
+
+# Implicit multiplication after a bracket.
+#! value 1
+cos(0)cos(0)
+let p = (2, 3)
+#! value 6
+p[1]p[2]
+#! value 12
+(p[1] + 1)p[1]*2

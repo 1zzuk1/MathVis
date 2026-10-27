@@ -1,0 +1,34 @@
+# Concepts: one notion, several forms, compared on examples.
+
+# A number is even: three ways to say it.
+# examples: n in {0, 1, 2, 3, 7, 10, -4}
+#! agree
+concept even(n: Z) where
+  remainder: n mod 2 = 0
+  half: exists k in -20..20: n = 2*k
+  parity: (-1)^n = 1
+
+#! value true
+even(12)
+
+#! value false
+even_half(9)
+
+#! agree
+interpret even(6)
+
+# Forms that are not equivalent: the table shows where they part.
+# examples: x in {-2, -1, 0, 1, 2}
+#! disagree
+concept positive(x: R) where
+  strict: x > 0
+  loose: x >= 0
+
+#! disagree
+interpret positive(0)
+
+# A constant given two ways.
+#! agree
+concept golden where
+  root: (1 + sqrt(5)) / 2
+  fraction: 1 + 1/((1 + sqrt(5)) / 2)

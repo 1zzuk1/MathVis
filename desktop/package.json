@@ -1,0 +1,71 @@
+{
+  "name": "theorem-sketchpad",
+  "productName": "Theorem Sketchpad",
+  "version": "1.0.0",
+  "description": "Write mathematics and see whether it's true: definitions and theorems checked, proved or refuted with the simplest counterexample, and drawn.",
+  "main": "main.js",
+  "homepage": "https://github.com",
+  "author": "Theorem Sketchpad contributors",
+  "private": true,
+  "scripts": {
+    "prepare-app": "node scripts/prepare.js",
+    "start": "node scripts/prepare.js && electron .",
+    "smoke": "node scripts/prepare.js && node scripts/smoke.js",
+    "pack": "node scripts/prepare.js && electron-builder --dir --publish never",
+    "dist": "node scripts/prepare.js && electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "io.github.theorem-sketchpad",
+    "productName": "Theorem Sketchpad",
+    "copyright": "Theorem Sketchpad contributors",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "app/**",
+      "build/icon.png"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "Theorem-Sketchpad-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Theorem-Sketchpad-${version}-portable.${ext}"
+    },
+    "mac": {
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ],
+      "category": "public.app-category.education",
+      "icon": "build/icon.png",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "artifactName": "Theorem-Sketchpad-${version}-mac-${arch}.${ext}"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Education",
+      "icon": "build/icon.png",
+      "maintainer": "Theorem Sketchpad <theorem-sketchpad@users.noreply.github.com>",
+      "synopsis": "Write mathematics and see whether it's true",
+      "artifactName": "Theorem-Sketchpad-${version}-linux-${arch}.${ext}"
+    }
+  }
+}

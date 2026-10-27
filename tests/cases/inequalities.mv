@@ -1,0 +1,117 @@
+# Exact inequalities, absolute values, min and max: proved when the algebra settles them,
+# never "proved" when false.
+
+# Quadratic forms (a positive semidefinite test).
+#! holds proved
+check forall a, b in R: a^2 + b^2 >= 2a*b
+#! holds proved
+check forall x in R: x^2 - x + 1 > 0
+#! holds proved
+check forall x, y, z in R: x^2 + y^2 + z^2 >= x*y + y*z + z*x
+#! fails
+check forall x, y in R: x^2 + y^2 >= 3x*y
+
+# One variable: exact root counting (Sturm), on the variable's range.
+#! holds proved
+check forall x in [0, 1]: x^2 <= x
+#! fails
+check forall x in R: x^2 >= x
+#! holds proved
+check forall x in R: x^4 - 4x + 3 >= 0
+#! holds proved
+check forall x in [-2, 2]: x^3 - 3x + 2 >= 0
+#! fails
+check forall x in [-3, 2]: x^3 - 3x + 2 >= 0
+#! holds proved
+check forall t in R: t^2/(1 + t^2) < 1
+
+# Signs from the ranges.
+#! holds proved
+check forall x, y in [1, 5]: (x - 1)*(y - 1) >= 0
+#! holds proved
+check forall x, y in [0, 3]: x*y + x + y >= 0
+
+# Absolute values: identities and the triangle inequality.
+#! holds proved
+check forall x, y in R: |x*y| = |x|*|y|
+#! holds proved
+check forall x in R: |x - 1|*|x + 1| = |x^2 - 1|
+#! holds proved
+check forall x in R: |x|^2 = x^2
+#! holds proved
+check forall a, b in R: |a + b| <= |a| + |b|
+#! holds proved
+check forall a, b in R: ||a| - |b|| <= |a - b|
+#! fails
+check forall a, b in R: |a - b| <= |a| - |b|
+#! holds proved
+check forall x in R: |x| >= x
+
+# min and max.
+#! holds proved
+check forall a, b in R: min(a, b) + max(a, b) = a + b
+#! holds proved
+check forall a, b in R: min(a, b) <= (a + b)/2
+#! holds proved
+check forall e in (0, 10]: min(1, e/3) <= 1 and min(1, e/3) <= e/3
+
+# Hypotheses are used.
+#! holds proved
+check forall x, y in R: x <= y -> x^3 <= y^3 + (y - x)^3
+#! holds proved
+check forall x in R: |x - 1| < 1 -> |x + 1| < 3
+
+# A proof whose inequality steps are now exact.
+theorem bound_near_1: forall e > 0: exists d > 0: forall x in R: |x - 1| < d -> |x + 1| < 3
+#! holds proved
+proof:
+  let e
+  choose d = min(1, e/3)
+  let x
+  assume |x - 1| < d
+  have |x - 1| < 1
+  so |x + 1| < 3
+
+# Facts about symbols: sin and cos in [−1, 1], exp > 0, √u ≥ 0 with (√u)² = u.
+#! holds proved
+check forall a, b in [0, 10]: sqrt(a*b) <= (a + b)/2
+#! holds proved
+check forall x in [0, 4]: sqrt(x) <= x/4 + 1
+#! fails
+check forall x in [0, 4]: sqrt(x) <= x/4
+#! holds proved
+check forall x in R: sin(x) + cos(x) <= 2
+#! holds proved
+check forall x in R: exp(x) > 0
+
+# Denominators: proved where they can't vanish, not otherwise.
+#! holds proved
+check forall t in R: t^2/(1 + t^2) < 1
+#! holds proved
+check forall x > 0: x + 1/x >= 2
+#! not-proved
+check forall x in R: x/x <= 1
+
+# min and max as an identity.
+#! holds proved
+check forall a, b in R: min(a, b) + max(a, b) = a + b
+
+# Products of constraints (Handelman), for nonlinear claims on boxes and polytopes.
+#! holds proved
+check forall x, y in [0, 1]: x*y >= x + y - 1
+#! fails
+check forall x, y in [0, 1]: x*y >= x + y - 0.9
+#! holds proved
+check forall e in (0, 3], x in R: |x - 1| < e/3 -> |x^2 - 1| < e
+
+# The ε-δ proof that x² is continuous at 1, every step exact.
+theorem square_continuous: forall ε > 0: exists δ > 0: forall x in R: |x - 1| < δ -> |x^2 - 1| < ε
+#! holds proved
+proof:
+  let ε
+  choose δ = min(1, ε / 3)
+  let x
+  assume |x - 1| < δ
+  have |x + 1| < 3 by the triangle inequality
+  have |x^2 - 1| = |x - 1| * |x + 1|
+  so |x^2 - 1| < ε

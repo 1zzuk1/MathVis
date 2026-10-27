@@ -1,0 +1,43 @@
+# Structures, records, namespaces, finite topologies, metric spaces.
+import algebra, metric
+import topology as top
+
+#! value 3
+Group(Zmod(6), add_mod(6), 0).op(4, 5)
+#! holds
+check Group(Zmod(6), add_mod(6), 0) in Group
+#! fails
+check Group(Zmod(5), loop5, 0) in Group
+#! fails
+check Group(Zmod(6), mul_mod(6), 1) in Group
+#! holds
+check Field(Zmod(5), add_mod(5), mul_mod(5), 0, 1) in Field
+#! fails
+check Field(Zmod(6), add_mod(6), mul_mod(6), 0, 1) in Field
+#! value ℤ/5
+{G = Zmod(5), op = sub_mod(5)}.G
+#! value 24
+|Sym(4)|
+#! value (1 2 3)
+algebra.cycles((2, 3, 1))
+
+# An explicit list of groups: checked exactly, so proved.
+#! holds proved
+check forall g in SmallGroups: forall x in g.G: |g.G| mod order(x, g.op, g.e) = 0
+# Over a structure's examples: evidence, never "proved".
+#! holds not-proved
+check forall M in MetricSpace: forall x, y, z in M.X: |M.d(x, z) - M.d(y, z)| <= M.d(x, y)
+#! fails simplest Group(S₃, ∘, (1, 2, 3))
+check forall g in SmallGroups: g in AbelianGroup
+
+#! holds
+check top.open({p in R^2 | |p| < 1})
+#! fails simplest TopologicalSpace({1, 2}, {∅, {1}, {1, 2}}), 2, 1
+check forall S in top.TopologicalSpace: top.T0(S) -> top.T1(S)
+#! value {1, 2}
+top.closure_in(top.TopologicalSpace({1, 2}, {∅, {1}, {1, 2}}), {1})
+#! value ∅
+top.interior_in(top.TopologicalSpace({1, 2}, {∅, {1}, {1, 2}}), {2})
+
+#! error
+Group(Zmod(6), add_mod(6))

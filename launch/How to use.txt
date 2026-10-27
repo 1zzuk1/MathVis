@@ -1,0 +1,29 @@
+Theorem Sketchpad
+=================
+
+Write definitions and theorems in a notation close to the blackboard (or in plain English, with
+the Words button), and the app checks them: proved when algebra settles it, otherwise tested on
+many examples, and when a claim is false you get the simplest counterexample, drawn.
+
+Starting it
+-----------
+* Double-click "Theorem Sketchpad.html". It opens in your web browser. Nothing is installed and
+  nothing is sent anywhere: it works offline (fonts look nicer when online).
+* Or use "Open as app" for your system, which opens the same file in its own window:
+    Windows:  Open as app (Windows).vbs
+    macOS:    Open as app (macOS).command  (the first time: right-click it, then Open)
+    Linux:    Open as app (Linux).sh       (allow it to run as a program if asked)
+  These use Microsoft Edge, Google Chrome, Brave or Chromium when one is installed, and your
+  default browser otherwise.
+
+Your work
+---------
+* Notebooks you save stay in this browser on this computer. Share > Download the notebook
+  saves one as a file; Share > Open a notebook file loads it again (on any computer).
+* Share > Download a report saves the results, with their pictures, as a web page anyone can open.
+
+First steps
+-----------
+The first example notebook (Analysis II, chapters 1-3) opens the first time: press Run
+(Ctrl+Enter), drag the sliders, then change something. The Notebook menu has the other chapters,
+through integrals in R^n and vector analysis; the Language tab is the reference.

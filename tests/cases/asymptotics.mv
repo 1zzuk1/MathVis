@@ -1,0 +1,70 @@
+# Exact eventual and local behaviour from formulas (src/asym.js, libs/asymptotics.js).
+import asymptotics
+
+# Limits of sequences given by formulas.
+#! value 1
+lim n -> inf: n*(exp(1/n) - 1)
+#! holds
+check converges_to(n => (1 + 1/n)^n, e)
+#! holds
+check converges_to(n => n*sin(1/n), 1)
+#! holds
+check not cauchy(n => (-1)^n)
+#! holds
+check bounded_seq(n => sin(n))
+#! holds
+check not bounded_seq(n => ln(n))
+
+# Series: each part by its own test.
+#! value false
+summable(n => (-1)^n/sqrt(n) + 1/n)
+#! value true
+summable(n => (-1)^n/sqrt(n))
+#! value false
+abs_summable(n => (-1)^n/sqrt(n))
+#! value true
+summable(n => sin(n)/n)
+#! value false
+summable(n => 1/(n*ln(n+1)))
+#! value true
+summable(n => 1/(n*ln(n+1)^2))
+#! value false
+summable(n => 1/((n+2)*ln(n+2)*ln(ln(n+2))))
+#! value true
+summable(n => n!/n^n)
+#! value true
+summable(n => cos(pi*n)/n)
+#! value like 0.5·n⁻⁰·⁵
+growth(n => sqrt(n+1) - sqrt(n))
+#! value true
+eventually_le(n => ln(n)^10, n => sqrt(n))
+#! value false
+eventually_le(n => 1/((n+2)*ln(n+2)*ln(ln(n+2))), n => n^(-1.01))
+
+# Functions at a point.
+#! value false
+continuous_at(x => if x = 0 then 0 else sin(1/x), 0)
+#! value true
+continuous_at(x => if x = 0 then 0 else x*sin(1/x), 0)
+#! value false
+differentiable_at(x => abs(x), 0)
+#! value true
+differentiable_at(x => if x = 0 then 0 else x^2*sin(1/x), 0)
+#! value false
+continuously_differentiable_at(x => if x = 0 then 0 else x^2*sin(1/x), 0)
+#! value true
+continuously_differentiable_at(x => if x = 0 then 0 else x^3*sin(1/x), 0)
+#! value true
+continuous_at(x => if x = 0 then 1 else sin(x)/x, 0)
+
+# Families and thresholds.
+#! value 1
+threshold(a => differentiable_at(x => if x = 0 then 0 else abs(x)^a * sin(1/x), 0), 0, 3)
+#! value 2
+threshold(a => continuously_differentiable_at(x => if x = 0 then 0 else abs(x)^a * sin(1/x), 0), 0, 4)
+#! value 1
+threshold(p => summable(n => 1/n^p), 0, 3)
+#! value false for −2 ≤ the parameter < 1; true only at the parameter = 1; false for 1 < the parameter ≤ 2
+describe_family(c => continuous_at(x => if x = 0 then c else sin(x)/x, 0), -2, 2)
+#! fails
+check alternating_with_a_nudge

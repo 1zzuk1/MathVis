@@ -1,0 +1,38 @@
+# interpret: the ways of looking at a value, and the forms of a concept at given arguments.
+import manifolds, graphs, logic, numtheory, linalg
+
+#! represents parametrization local_equations local_graph straightening
+interpret zero_set((x, y) => x^2 + y^2 - 1)
+
+#! represents truth_table normal_forms venn
+interpret (p, q) => p -> q
+
+#! represents factorization bases instance prime
+interpret 13
+
+#! represents continued_fraction expansions
+interpret sqrt(2)
+
+#! represents matrix_as_map matrix_eigen quadratic_form matrix_rref instance invertible posdef
+interpret [[2, 1], [1, 2]]
+
+#! represents graph_drawing graph_matrix graph_lists graph_spectrum instance tree bipartite connected_graph
+interpret path_graph(4)
+
+# The four local descriptions agree at a point on the circle, and at one off it.
+#! agree
+interpret on_manifold(zero_set((x, y) => x^2 + y^2 - 1), (0.6, 0.8))
+#! agree
+interpret on_manifold(zero_set((x, y) => x^2 + y^2 - 1), (0.6, 0.9))
+
+#! value true
+on_manifold_graph(parametrized(t => (cos(t), sin(t), t), [0, 6]), (cos(2), sin(2), 2))
+
+#! agree
+interpret eulerian(complete_graph(5))
+
+# Tangent and normal spaces of the unit sphere at the north pole.
+#! value 1
+len(normal_space(zero_set((x, y, z) => x^2 + y^2 + z^2 - 1), (0, 0, 1)))
+#! holds
+check forall p in zero_set((x, y, z) => x^2 + y^2 + z^2 - 1): |dot(normal_space(zero_set((x, y, z) => x^2 + y^2 + z^2 - 1), p)[1], p)| ~= 1

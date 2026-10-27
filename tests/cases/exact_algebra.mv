@@ -1,0 +1,66 @@
+# Exact algebra: identities are proved, not sampled; near-misses are not.
+
+#! holds proved
+check forall x, y in R: (x + y)^2 = x^2 + 2x*y + y^2
+#! holds proved
+check forall a, b in R: (a - b)*(a + b) = a^2 - b^2
+#! fails
+check forall x, y in R: (x + y)^3 = x^3 + y^3
+#! holds proved
+check forall x in R: sin(x)^2 + cos(x)^2 = 1
+#! holds proved
+check forall x, y in R: (x^2 + y^2)/(1 + x^2) - y^2/(1 + x^2) = x^2/(1 + x^2)
+
+# Closed forms of sums (Faulhaber), proved for every n, not only the ones sampled.
+#! holds proved
+check forall n in N: sum k in 1..n: k = n*(n + 1)/2
+#! holds proved
+check forall n in N: sum k in 1..n: k^2 = n*(n + 1)*(2n + 1)/6
+#! holds proved
+check forall n in N: sum k in 1..n: k^3 = (sum k in 1..n: k)^2
+#! holds proved
+check forall n in N: sum k in 0..n: (3k^2 + 3k + 1) = (n + 1)^3
+
+# Your definitions are expanded.
+def f(x) := x^2 + 1
+#! holds proved
+check forall t in R: f(t + 1) - f(t) = 2t + 1
+
+# Not proved: x/x is undefined at 0 (and the samples include 0).
+#! not-proved
+check forall x in R: x/x = 1
+# Not proved: for negative n the sum is empty, and the formula is wrong there.
+#! fails
+check forall n in Z: sum k in 1..n: k = n*(n + 1)/2
+
+# An induction proved step by step, the step using the induction hypothesis as a rewrite.
+theorem telescoping: forall n in N: sum k in 1..n: 1/(k*(k + 1)) = n/(n + 1)
+#! holds proved
+proof:
+  induction on n
+  base:
+    so sum k in 1..0: 1/(k*(k + 1)) = 0/(0 + 1)
+  step:
+    let n
+    assume sum k in 1..n: 1/(k*(k + 1)) = n/(n + 1)
+    so sum k in 1..n + 1: 1/(k*(k + 1)) = (n + 1)/(n + 2)
+
+theorem geometric: forall n in N: sum k in 0..n: 2^k = 2^(n + 1) - 1
+#! holds proved
+proof:
+  induction on n
+  base:
+    so sum k in 0..0: 2^k = 2^(0 + 1) - 1
+  step:
+    let n
+    assume sum k in 0..n: 2^k = 2^(n + 1) - 1
+    have 2^(n + 2) = 2 * 2^(n + 1)
+    so sum k in 0..n + 1: 2^k = 2^(n + 2) - 1
+
+# A step that uses a chosen value: with x = 2y, x² = 4y².
+theorem double: forall y in R: exists x in R: x^2 = 4y^2
+#! holds
+proof:
+  let y
+  choose x = 2y
+  so x^2 = 4y^2

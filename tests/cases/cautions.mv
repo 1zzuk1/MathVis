@@ -1,0 +1,51 @@
+# Claims of a shape sampling answers wrongly get a caution instead of a plain "holds".
+import topology, functions, sequences, multivar
+
+#! holds caution extremum
+check exists p in {q in R^2 | |q| < 1}: forall q in {q in R^2 | |q| < 1}: q[1] + q[2] <= p[1] + p[2]
+
+def attains(f, S) := exists p in S: forall q in S: f(q) <= f(p)
+#! holds caution extremum
+check attains(x => x, Ioo(0, 1))
+
+def unif(f, S) := forall ε in (0, 1]: exists δ in (0, 1]: forall x, y in S: |x - y| < δ -> |f(x) - f(y)| < ε
+#! holds caution pairs
+check unif(x => 1/x, Ioc(0, 1))
+
+def bdd(S) := exists M in (0, 1000]: forall x in S: |x| <= M
+#! holds caution window
+check bdd({p in R^2 | p[1] >= 0})
+#! holds no-caution
+check bdd({p in R^2 | |p| <= 1})
+
+# The library's own definitions are written so that sampling can decide them.
+#! holds no-caution
+check uniformly_continuous_on(x => x^2, 0, 1)
+#! holds no-caution
+check continuous_at_point(p => p[1]*p[2], (1, 1))
+#! holds no-caution
+check forall x in R: exists y in R: y > x
+#! holds no-caution
+check exists n in 1..10: forall k in 1..10: k <= n
+# A hypothesis that keeps x near a point: the window doesn't matter.
+#! holds no-caution
+check forall ε > 0: exists δ > 0: forall x in R: |x - 3| < δ -> |x^2 - 9| < ε
+# An equation between two variables over the same set (an identity element) is decided fine.
+#! holds no-caution
+check exists e in [-1, 1]: forall x in [-1, 1]: e * x = 0
+
+# A failure only at tiny ε, after a much deeper search for δ rescued larger ones: x^(1/5) needs δ ≈ ε⁵.
+import compactness
+#! fails fail-caution tiny
+check uniformly_continuous_set(x => x^(1/5), Icc(0, 1))
+# The deeper search finds δ ≈ ε² for √x and ε³ for ∛x.
+#! holds
+check uniformly_continuous_set(x => sqrt(x), Icc(0, 1))
+#! holds
+check uniformly_continuous_set(x => x^(1/3), Icc(0, 1))
+# A real failure: no warning. 1/x on (0, 1], and a jump the deeper search must not blur away.
+#! fails no-fail-caution
+check uniformly_continuous_set(x => 1/x, Ioc(0, 1))
+def cont(f, a) := forall ε in (0, 1]: exists δ in (0, 1]: forall x in [a - δ, a + δ]: |f(x) - f(a)| < ε
+#! fails no-fail-caution
+check cont(x => if x < 0.5 then 0 else 0.001, 0.5)

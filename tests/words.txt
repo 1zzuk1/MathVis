@@ -1,0 +1,113 @@
+# Plain words → notation: each sentence, then "=>" and the notation it must give (lines joined by " ; "),
+# or "=> REVIEW" when the translator must flag it as not fully understood. Checked by tests/run.js.
+
+For every real number x, x squared is at least 0.
+  => check forall x in R: x^2 >= 0
+For all x in [0, 1], x^2 <= x.
+  => check forall x in [0, 1]: x^2 <= x
+There is a natural number n such that n squared exceeds 50.
+  => check exists n in N: n^2 > 50
+Every continuous function on [0, 1] is bounded.
+  => import functions ; check forall f in Functions(R): continuous_on(f, 0, 1) -> bounded_on(f, 0, 1)
+Every convergent sequence is bounded.
+  => import sequences ; check forall s in Sequences(R): convergent(s) -> bounded_seq(s)
+Every bounded sequence is convergent.
+  => import sequences ; check forall s in Sequences(R): bounded_seq(s) -> convergent(s)
+If n is even then n squared is even.
+  => check forall n in Z: n mod 2 = 0 -> (n^2) mod 2 = 0
+The sum of k for k from 1 to n equals n(n + 1)/2 for every natural number n.
+  => check forall n in N: (sum k in 1..n: k) = n*(n + 1)/2
+For every epsilon > 0 there is a natural number N such that 1/N < epsilon.
+  => check forall ε > 0: exists N in N: 1/N < ε
+Prove that the square root of x is at most x for all x between 0 and 1.
+  => check forall x in [0, 1]: sqrt(x) <= x
+Every prime greater than 2 is odd.
+  => import numtheory ; check forall p in 2..1000: isprime(p) and p > 2 -> p mod 2 = 1
+For all positive real numbers a and b, the square root of a times b is at most the sum of a and b divided by 2.
+  => check forall a, b > 0: sqrt(a*b) <= (a + b)/2
+x squared minus 1 equals (x - 1)(x + 1) for every x.
+  => check forall x in R: x^2 - 1 = (x - 1)*(x + 1)
+Every group of order 4 is abelian.
+  => import models ; check forall g in AllGroups(12): |g.G| = 4 -> (forall a, b in g.G: g.op(a, b) = g.op(b, a))
+Every closed set is open.
+  => import topology ; check forall S in Subsets(R): closed(S) -> open(S)
+The limit of 1/n as n goes to infinity equals 0.
+  => check (lim n -> inf: 1/n) = 0
+What is the sum from k = 1 to 10 of k squared?
+  => (sum k in 1..10: k^2)
+Define f(x) to be x squared plus 1.
+  => def f(x) := x^2 + 1
+Plot sin(x) for x from -3 to 3.
+  => plot sin(x) for x in [-3, 3]
+For every x, the absolute value of x plus y is at most the absolute value of x plus the absolute value of y for every y.
+  => check forall x in R: forall y in R: |x| + y <= |x| + |y|
+No prime number is a perfect square.
+  => import numtheory ; check forall p in 2..1000: isprime(p) -> not floor(sqrt(p))^2 = p
+Some sequence is increasing and bounded.
+  => import sequences ; check exists s in Sequences(R): (increasing_seq(s) and bounded_seq(s))
+For every integer n, n squared minus n is even.
+  => check forall n in Z: (n^2 - n) mod 2 = 0
+For all x and y in R, x^2 + y^2 is at least twice x times y.
+  => check forall x, y in R: x^2 + y^2 >= 2x*y
+There exists x in the interval from 0 to 1 such that x equals cos of x.
+  => check exists x in [0, 1]: x = cos(x)
+Every differentiable function on [0, 1] is continuous on [0, 1].
+  => import functions ; check forall f in Functions(R): (forall t in [0, 1]: differentiable_at(f, t)) -> continuous_on(f, 0, 1)
+If x is greater than 1 then x squared is greater than x.
+  => check forall x in R: x > 1 -> x^2 > x
+n divides n squared for every positive integer n.
+  => check forall n in N: n >= 1 -> (n^2) mod n = 0
+For all real x, sin of x squared plus cos of x squared equals one.
+  => check forall x in R: sin(x^2) + cos(x^2) = 1
+Every increasing function on [0, 1] is bounded.
+  => import functions ; check forall f in Functions(R): increasing_on(f, 0, 1) -> bounded_on(f, 0, 1)
+Some sequence is increasing and bounded.
+  => import sequences ; check exists s in Sequences(R): (increasing_seq(s) and bounded_seq(s))
+The square of any real number is nonnegative.
+  => check forall x in R: x^2 >= 0
+For every real x there is a real y with y greater than x.
+  => check forall x in R: exists y in R: y > x
+There is no largest natural number.
+  => REVIEW
+The product of two odd numbers is odd.
+  => check forall m, n in Z: m mod 2 = 1 and n mod 2 = 1 -> (m * n) mod 2 = 1
+For all x, if x is positive then x plus 1 over x is at least 2.
+  => check forall x in R: x > 0 -> x + 1/x >= 2
+Is it true that every bounded increasing sequence converges?
+  => import sequences ; check forall s in Sequences(R): bounded_seq(s) and increasing_seq(s) -> convergent(s)
+2 to the power n is greater than n squared for every natural number n greater than 4.
+  => check forall n in N: n > 4 -> 2^n > n^2
+For every n, n factorial is at least 2 to the power n minus 1.
+  => check forall n in N: n! >= 2^n - 1
+The function x squared is continuous at 0.
+  => import functions ; check continuous_at((x => x^2), 0)
+For all a and b, the absolute value of a times b equals the absolute value of a times the absolute value of b.
+  => check forall a, b in R: |a*b| = |a|*|b|
+For every x in [0, 1], x cubed is at most x squared.
+  => check forall x in [0, 1]: x^3 <= x^2
+Every compact set is closed.
+  => import topology ; check forall S in Subsets(R): (closed(S) and bounded(S)) -> closed(S)
+x is between 0 and 1 for every x in the unit interval.
+  => check forall x in [0, 1]: 0 <= x <= 1
+The maximum of a and b is at least a for all real a and b.
+  => check forall a, b in R: max(a, b) >= a
+For each natural number n, 3 divides n cubed minus n.
+  => check forall n in N: (n^3 - n) mod 3 = 0
+For every positive real number x, the natural log of x is less than x.
+  => check forall x > 0: ln(x) < x
+Every cyclic group is abelian.
+  => import models ; check forall g in AllGroups(12): cyclic_group(g) -> (forall a, b in g.G: g.op(a, b) = g.op(b, a))
+Let a be 3.
+  => let a = 3
+Compute the limit of (1 + 1/n) to the power n as n goes to infinity.
+  => (lim n -> inf: (1 + 1/n)^n)
+For all real x and y, the square root of x squared plus y squared is at most the absolute value of x plus the absolute value of y.
+  => check forall x, y in R: sqrt(x^2) + y^2 <= |x| + |y|
+There exist integers a and b such that a squared plus b squared equals 25.
+  => check exists a, b in Z: a^2 + b^2 = 25
+The sum of the first n odd numbers is n squared.
+  => check forall n in N: (sum k in 1..n: (2k - 1)) = n^2
+f(x) = x^2 is increasing on [0, 1].
+  => REVIEW
+Every real number is the sum of a rational number and an irrational number.
+  => REVIEW

@@ -1,0 +1,131 @@
+# Proof sketches: each step checked in its context, the goal tracked through blocks.
+
+theorem square_continuous: forall ε > 0: exists δ > 0: forall x in R: |x - 1| < δ -> |x^2 - 1| < ε
+#! holds
+proof:
+  let ε
+  choose δ = min(1, ε / 3)
+  let x
+  assume |x - 1| < δ
+  have |x + 1| < 3 by the triangle inequality
+  have |x^2 - 1| = |x - 1| * |x + 1|
+  so |x^2 - 1| < ε
+
+theorem square_continuous_again: forall ε > 0: exists δ > 0: forall x in R: |x - 1| < δ -> |x^2 - 1| < ε
+#! fails at 5
+proof:
+  let ε
+  choose δ = ε
+  let x
+  assume |x - 1| < δ
+  so |x^2 - 1| < ε
+
+theorem am_gm: forall a, b in [0, 10]: sqrt(a*b) <= (a + b)/2
+#! open
+proof:
+  let a, b
+  have (sqrt(a) - sqrt(b))^2 >= 0
+
+# Cases: |x| ≥ x, split on the sign of x.
+theorem abs_above: forall x in R: |x| >= x
+#! holds
+proof:
+  let x
+  case x >= 0:
+    have |x| = x
+    so |x| >= x
+  case x < 0:
+    have |x| > 0
+    so |x| >= x
+
+# The cases must cover everything: x > 0 and x < 0 miss 0.
+theorem abs_above_gap: forall x in R: |x| >= x
+#! fails at 2
+proof:
+  let x
+  case x > 0:
+    so |x| >= x
+  case x < 0:
+    so |x| >= x
+
+# otherwise covers the rest; a case that doesn't reach the goal leaves it open.
+theorem sq_nonneg: forall x in R: x^2 >= 0
+#! open
+proof:
+  let x
+  case x >= 0:
+    so x^2 >= 0
+  otherwise:
+    have -x > 0
+
+theorem sq_nonneg_again: forall x in R: x^2 >= 0
+#! holds
+proof:
+  let x
+  case x >= 0:
+    so x^2 >= 0
+  otherwise:
+    have -x > 0
+    so x^2 = (-x)^2 and (-x)^2 >= 0
+
+# Induction: the sum of the first n odd numbers.
+theorem odd_sum: forall n in N: sum k in 1..n: (2k - 1) = n^2
+#! holds
+proof:
+  induction on n
+  base:
+    so sum k in 1..0: (2k - 1) = 0^2
+  step:
+    let n
+    assume sum k in 1..n: (2k - 1) = n^2
+    have sum k in 1..n + 1: (2k - 1) = (sum k in 1..n: (2k - 1)) + 2(n + 1) - 1
+    so sum k in 1..n + 1: (2k - 1) = (n + 1)^2
+
+# Without blocks, the base and the step are checked directly.
+theorem gauss: forall n in 1..60: sum k in 1..n: k = n*(n + 1)/2
+#! holds
+proof:
+  induction on n
+
+# A false formula: the step fails.
+theorem bad_sum: forall n in N: sum k in 1..n: k = n^2
+#! fails
+proof:
+  induction n
+  base:
+    so sum k in 1..0: k = 0^2
+  step:
+    let n
+    assume sum k in 1..n: k = n^2
+    so sum k in 1..n + 1: k = (n + 1)^2
+
+# Induction needs whole numbers.
+theorem real_induction: forall x in [0, 1]: x^2 <= 1
+#! fails at 1
+proof:
+  induction on x
+
+# Contradiction: √2 has no square that is exactly 2 among the fractions p/q with small q.
+theorem no_half_square: forall q in 1..30: forall p in 0..60: (p/q)^2 != 2
+#! holds
+proof:
+  let q, p
+  contradiction
+  have (p/q)^2 = 2
+  have p^2 = 2q^2
+  so false
+
+# Citing a lemma: the step is matched to the lemma's conclusion and its hypothesis checked.
+lemma sq_mono: forall a, b in [0, 100]: a <= b -> a^2 <= b^2
+theorem sq_bound: forall x in [0, 3]: x^2 <= 9
+#! holds
+proof:
+  let x
+  have x <= 3
+  so x^2 <= 3^2 by sq_mono
+
+theorem sq_bound_wrong: forall x in [-5, 3]: x^2 <= 9
+#! fails at 2
+proof:
+  let x
+  so x^2 <= 3^2 by sq_mono

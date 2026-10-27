@@ -1,0 +1,41 @@
+# Exact reals: numbers that know whether they are rational (src/exact.js).
+import integration
+
+#! value √2/2
+sqrt(1/2)
+#! value 2
+sqrt(4)
+#! value false
+is_rational(sqrt(2))
+#! value true
+is_rational(1/3)
+#! value true
+is_rational(sqrt(2) * sqrt(2))
+#! value false
+is_rational(1 + sqrt(3))
+#! value 8
+denominator(3/8)
+#! value 0
+dirichlet(sqrt(2))
+#! value 1
+dirichlet(2/7)
+
+# Claims about rationality are sampled with exact rationals and irrationals.
+#! fails simplest √2/2
+check forall x in [0, 1]: is_rational(x)
+#! fails simplest 0
+check forall x in [0, 3]: not is_rational(x)
+#! fails simplest √2
+check forall x in Irrationals: x^2 != 2
+#! holds
+check forall x in Q: is_rational(x)
+#! holds
+check forall x in Q, y in Q: is_rational(x + y)
+#! fails
+check forall x in Irrationals, y in Irrationals: not is_rational(x + y)
+#! fails simplest 0
+check forall x in [0, 1]: dirichlet(x) = 0
+#! holds
+check forall x in [0, 1]: dirichlet(x) + dirichlet(x + sqrt(2)) <= 1
+#! fails simplest 0
+check forall x in [0, 1]: thomae(x) < 1/2

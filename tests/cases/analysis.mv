@@ -1,0 +1,46 @@
+# Analysis: sequences, series, integration, function sequences, several variables.
+import functions, sequences, series, integration, multivar
+
+#! holds
+check converges_to(n => 1/n, 0)
+#! value false
+summable(n => 1/n)
+#! value true
+summable(n => (-1)^n / n)
+#! value 0.693147
+series_sum(n => (-1)^(n+1) / n)
+#! value 1
+ratio_limit(n => 1/n)
+#! value 0.5
+ratio_limit(n => 1/2^n)
+
+# 1/x on [0, 1] with 1/0 set to 0 is unbounded (deep samples approach 0 even at a closed end).
+#! value false
+bounded_on(x => if x > 0 then 1/x else 0, 0, 1)
+#! value false
+integrable_on(dirichlet, 0, 1)
+#! value true
+integrable_on(thomae, 0, 1)
+#! value 1
+upper_sum(dirichlet, 0, 1, 10)
+#! value 0
+lower_sum(dirichlet, 0, 1, 10)
+
+# Uniform convergence agrees with what each example sequence is known to do.
+#! holds
+check forall F in FunctionSequences: uniformly_converges(F, 0, 1) <-> F.uniform
+#! holds
+check forall F in FunctionSequences: pointwise_converges(F, 0, 1)
+
+#! value −1
+mixed_partial(p => if p = (0, 0) then 0 else p[1]*p[2]*(p[1]^2 - p[2]^2) / (p[1]^2 + p[2]^2), (0, 0), 1, 2)
+#! value false
+differentiable_at_point(p => if p = (0, 0) then 0 else p[1]*p[2]/(p[1]^2 + p[2]^2), (0, 0))
+#! value true
+differentiable_at_point(p => p[1]^2 + p[2]^2, (0, 0))
+#! value false
+regular_value(p => p[1]^2 + p[2]^2 - p[3]^2, 0, 2, 3)
+#! value true
+regular_value(p => p[1]^2 + p[2]^2 + p[3]^2, 1, 2, 3)
+#! value [[4, 2], [2, 0]]
+hessian(p => p[1]^2 * p[2], (1, 2))

@@ -1,0 +1,90 @@
+# Group structure and diagrams.
+import groups
+
+#! value 30
+|subgroups(S4)|
+#! value 10
+|subgroups(D4)|
+#! value 6
+|subgroups(Q8)|
+#! value ⟨r²⟩
+center(D4)
+#! value ℤ/2
+iso_name(center(D4))
+#! value ℤ/2 × ℤ/2
+iso_name(quotient(D4, center(D4)))
+#! value true
+normal(generated(S4, {(2, 1, 4, 3), (3, 4, 1, 2)}), S4)
+#! value S₃
+iso_name(quotient(S4, generated(S4, {(2, 1, 4, 3), (3, 4, 1, 2)})))
+#! value 5
+|conjugacy_classes(S4)|
+# 6 automorphisms, the trivial map, and 3 maps onto the subgroups of order 2.
+#! value 10
+|homomorphisms(S3, S3)|
+#! value true
+isomorphic(Dihedral(3), S3)
+#! value false
+isomorphic(Q8, D4)
+
+#! fails simplest A₄ (even permutations of 4), 6
+check forall g in AllGroups(12): forall d in 1..12: |g.G| mod d = 0 -> exists H in subgroups(g): |H.G| = d
+#! fails simplest Q₈ (quaternions)
+check forall g in AllGroups(12): (forall H in subgroups(g): normal(H, g)) -> g in AbelianGroup
+#! fails simplest D₄ (symmetries of a square), ⟨r², s⟩, ⟨s⟩
+check forall g in AllGroups(8): forall H, K in subgroups(g): K.G ⊆ H.G and normal(K, H) and normal(H, g) -> normal(K, g)
+#! holds proved
+check forall g, h in AllGroups(6): forall f in homomorphisms(g, h): isomorphic(quotient(g, kernel_of(f, g, h)), image_of(f, g, h))
+
+# Diagrams: the first isomorphism theorem for the sign map, and exact sequences.
+let G = S3
+let K = generated(G, {(2, 3, 1)})
+let Q = quotient(G, K)
+let q = Q.projection
+let H = Cyclic(2)
+let f = x => if x in K.G then 0 else 1
+let fbar = c => if c = Q.e then 0 else 1
+let wrong = c => 0
+#! holds
+diagram first_iso:
+  f: G -> H
+  q: G -> Q
+  fbar: Q -> H
+  fbar ∘ q = f
+#! fails
+diagram broken:
+  f: G -> H
+  q: G -> Q
+  wrong: Q -> H
+  wrong ∘ q = f
+let one = Cyclic(1)
+let a = x => K.e
+let i = x => x
+let z = x => 0
+#! holds
+diagram short_exact:
+  a: one -> K
+  i: K -> G
+  f: G -> H
+  z: H -> one
+  exact at K
+  exact at G
+  exact at H
+#! fails
+diagram not_exact:
+  a: one -> G
+  f: G -> H
+  z: H -> one
+  exact at G
+#! error
+diagram mismatched:
+  f: G -> H
+  q: G -> Q
+  f ∘ q = f
+# Maps written with plain numbers into ℤ/2 are still recognised as homomorphisms.
+#! holds homs
+diagram sign_is_hom:
+  f: G -> H
+  q: G -> Q
+  fbar: Q -> H
+  fbar ∘ q = f

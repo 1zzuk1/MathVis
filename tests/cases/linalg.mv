@@ -1,0 +1,34 @@
+# Linear algebra: exact elimination, subspaces, eigenvalues, badly scaled matrices.
+import linalg
+
+#! value −3
+det([[1, 2, 3], [4, 5, 6], [7, 8, 10]])
+#! value [[−2/3, −4/3, 1], [−2/3, 11/3, −2], [1, −2, 1]]
+inv([[1, 2, 3], [4, 5, 6], [7, 8, 10]])
+#! value 2
+rank([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+#! value span{(1, −2, 1)}
+kernel([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+#! value true
+kernel([[1, 2], [2, 4]]) = Span((2, -1))
+#! value (1, 1, 1)
+eigenvalues([[1, 1, 0], [0, 1, 1], [0, 0, 1]])
+#! value true
+diagonalizable([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+#! value false
+diagonalizable([[1, 1], [0, 1]])
+#! value (1, 0, 0) + span{(−1, 1, 0), (−1, 0, 1)}
+solutions([[1, 1, 1]], (1))
+#! value ∅ (no solutions)
+solutions([[1, 1], [1, 1]], (1, 2))
+
+# Rows of wildly different sizes: rank, kernel and det stay right.
+#! value 3
+rank([[1e-8, 0, 0], [0, 1, 0], [0, 0, 1e8]])
+#! value 4
+det([[1e-8, 0, 0], [0, 1, 0], [0, 0, 1e8]] * [[2, -1, 0], [-1, 2, -1], [0, -1, 2]])
+
+#! fails simplest identity [[1, 0], [0, 1]], identity [[1, 0], [0, 1]]
+check forall A, B in Mat(2): det(A + B) = det(A) + det(B)
+#! holds
+check forall A in Mat(3): diagonalizable(A + transpose(A))

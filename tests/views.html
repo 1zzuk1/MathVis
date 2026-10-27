@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>View tests — Theorem Sketchpad</title>
+<style>
+  body { font: 14px/1.45 system-ui, sans-serif; margin: 20px; color: #17201C; background: #FAFBFA; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  #status { margin: 0 0 14px; font-weight: 600; }
+  .pass { color: #1E8A57; } .fail { color: #CF3B33; }
+  table { border-collapse: collapse; margin-bottom: 18px; }
+  td, th { text-align: left; padding: 3px 10px 3px 0; vertical-align: top; }
+  td.detail { color: #56635E; max-width: 680px; }
+  iframe { width: 1200px; height: 760px; border: 1px solid #D5DCD8; }
+</style>
+</head>
+<body>
+<h1>View tests</h1>
+<p>Runs every example and course notebook in the app below, cut down to its definitions and
+<code>show</code> lines, and checks that each view draws without an error. Every view a library
+provides must be shown in some notebook. Serve the folder (<code>npm run serve</code>) and open
+<code>/tests/views.html</code>.</p>
+<p id="status">Loading the app…</p>
+<table id="results"><thead><tr><th>Notebook</th><th>View</th><th>Result</th><th></th></tr></thead><tbody></tbody></table>
+<iframe id="app" src="../index.html" title="The app under test"></iframe>
+<script src="notebooks.js"></script>
+<script>
+'use strict';
+const frame = document.getElementById('app');
+const tbody = document.querySelector('#results tbody');
+const status = document.getElementById('status');
+const row = (nb, view, ok, detail) => {
+  const tr = document.createElement('tr');
+  for (const [text, cls] of [[nb], [view], [ok ? 'ok' : 'FAIL', ok ? 'pass' : 'fail'], [detail || '', 'detail']]) {
+    const td = document.createElement('td');
+    td.textContent = text;
+    if (cls) td.className = cls;
+    tr.append(td);
+  }
+  tbody.append(tr);
+};
+// Statements a view may depend on; everything else (checks, explain, proofs…) is left out.
+const KEEP = new Set(['import', 'library', 'let', 'def', 'structure', 'concept', 'show', 'interpret']);
+
+frame.addEventListener('load', async () => {
+  const W = frame.contentWindow, MV = W.MV, APP = W.APP;
+  const errors = [];
+  W.addEventListener('error', e => errors.push(e.message));
+  const notebooks = [...APP.EXAMPLES.map(n => ['example', n]), ...APP.COURSES.map(n => ['course', n]), ...(window.TEST_NOTEBOOKS || []).map(n => ['test', n])];
+  const shown = new Set(), shownReps = new Set();
+  let pass = 0, fail = 0;
+  for (const [group, nb] of notebooks) {
+    const stmts = MV.splitStatements(nb.src);
+    const kept = [];
+    for (const s of stmts) {
+      let ast;
+      try { ast = MV.parseStatement(s); } catch (e) { continue; }
+      if (KEEP.has(ast.type)) kept.push({ s, ast });
+    }
+    if (!kept.some(k => k.ast.type === 'show' || k.ast.type === 'interpret')) continue;
+    status.textContent = `Running ${nb.name}…`;
+    errors.length = 0;
+    APP.editor.set(kept.map(k => k.s.text).join('\n'));
+    await APP.run();
+    await new Promise(r => setTimeout(r, 300));
+    const cards = [...W.document.querySelectorAll('#cards .card')];
+    const shows = kept.filter(k => k.ast.type === 'show');
+    // Cards come in statement order; match each show card by its kind label.
+    const showCards = cards.filter(c => /^show/i.test((c.querySelector('.kind') || {}).textContent || ''));
+    shows.forEach((k, i) => {
+      const c = showCards[i];
+      shown.add(k.ast.name);
+      const chip = c && c.querySelector('.chip.error:not([hidden])');
+      const drew = c && [...c.querySelectorAll('canvas, svg, table, math, .fig, img')].some(e => !e.closest('.formula, .card-head'));
+      const ok = !!c && !chip && !!drew;
+      ok ? pass++ : fail++;
+      const why = !c ? 'no card' : chip ? c.innerText.split('\n').filter(l => /error|line \d+:/i.test(l)).slice(-1)[0] || 'error' : !drew ? 'drew nothing' : '';
+      row(`${group}: ${nb.name}`, k.s.text.trim().slice(0, 70), ok, why);
+    });
+    // interpret: every section (one per way of looking at the value) drew something, without errors.
+    const interps = kept.filter(k => k.ast.type === 'interpret');
+    const interpCards = cards.filter(c => /^interpret/i.test((c.querySelector('.kind') || {}).textContent || ''));
+    interps.forEach((k, i) => {
+      const c = interpCards[i];
+      const chip = c && c.querySelector('.chip.error:not([hidden])');
+      const secs = c ? [...c.querySelectorAll('.interp')] : [];
+      const bad = secs.filter(sec => sec.querySelector('.error-msg') || ![...sec.querySelectorAll('canvas, svg, table, .view-html, .note')].length);
+      for (const sec of secs) {
+        const t = (sec.querySelector('.interp-title') || {}).textContent || '';
+        for (const r of MV.REPRESENT) if (r.label && t.startsWith(r.label)) shownReps.add(r.name);
+      }
+      const ok = !!c && !chip && !bad.length;
+      ok ? pass++ : fail++;
+      row(`${group}: ${nb.name}`, k.s.text.trim().slice(0, 70), ok, !c ? 'no card' : chip ? 'error' : bad.length ? 'failed: ' + bad.map(b => (b.querySelector('.interp-title') || {}).textContent).join(', ') : '');
+    });
+    if (errors.length) { fail++; row(`${group}: ${nb.name}`, '(page errors)', false, errors.join(' | ')); }
+  }
+  // Coverage: every view of every library is shown somewhere.
+  for (const [lib, L] of MV.REG) for (const v of Object.keys((L.def && L.def.views) || {})) {
+    if (shown.has(v)) continue;
+    fail++;
+    row('—', `${lib}.${v}`, false, 'never shown in an example or course notebook');
+  }
+  // Every way of looking at a value (MathViz.represent) is shown by some interpret.
+  for (const r of MV.REPRESENT) if (!shownReps.has(r.name)) { fail++; row('—', `${r.lib || '?'}: ${r.name}`, false, 'never shown by interpret in an example or course notebook'); }
+  const ok = fail === 0;
+  status.textContent = ok ? `All ${pass} views drew.` : `${fail} failed, ${pass} passed.`;
+  status.className = ok ? 'pass' : 'fail';
+  document.title = (ok ? 'PASS' : 'FAIL') + ' — view tests';
+  window.RESULT = { ok, pass, fail };
+});
+</script>
+</body>
+</html>
